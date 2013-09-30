@@ -25,7 +25,7 @@ public class PhotoActivity extends Activity {
 	ProgressDialog p;
 	ImageView image;
 	URL url;
-	String s[] = getResources().getStringArray(R.array.photo_urls);
+	String s[];
 	Bitmap bm;
 	int mode;
 	int cur_image, size;
@@ -35,6 +35,9 @@ public class PhotoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo);
+		
+		s= getResources().getStringArray(R.array.photo_urls);
+		
 		image = (ImageView) findViewById(R.id.imageView1);
 		if (getIntent().getExtras() != null) {
 			mode = getIntent().getExtras().getInt("MODE");

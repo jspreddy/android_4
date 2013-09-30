@@ -25,25 +25,41 @@ public class PhotoActivity extends Activity {
 	ProgressDialog p;
 	ImageView image;
 	URL url;
-	String s[];
+	String s[] = getResources().getStringArray(R.array.photo_urls);
 	Bitmap bm;
 	int mode;
-	
+	int cur_image, size;
+	float nextXClick,prevXClick,maxX,minX,maxY,minY;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo);
-		image = (ImageView)findViewById(R.id.imageView1);
-		if(getIntent().getExtras() != null){
+		image = (ImageView) findViewById(R.id.imageView1);
+		if (getIntent().getExtras() != null) {
 			mode = getIntent().getExtras().getInt("MODE");
+			cur_image = 0;
+			size = s.length;
 			new DoWork().execute();
 		}
-		
+
 		image.setOnTouchListener(new OnTouchListener() {
-			
+
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
-				
+				if (mode == 1) {
+					//maxY = v.getHeight();
+					//maxX = v.getWidth();
+					if (event.getAction() == MotionEvent.ACTION_DOWN) {
+						if (event.getX() > nextXClick && event.getX() < maxX
+								&& event.getY() > minY && event.getY() < maxY)
+							cur_image = (cur_image + 1) % size;
+						else if(event.getX() > prevXClick && event.getX() < minX
+								&& event.getY() > minY && event.getY() < maxY)
+							cur_image = (cur_image - 1) % size;
+
+					}
+				}
+
 				return false;
 			}
 		});
@@ -60,11 +76,10 @@ public class PhotoActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			//String s = R.array.photo_urls[0];
-			
+
 			try {
-	            InputStream in = new java.net.URL(s[0]).openStream();
-	            bm = BitmapFactory.decodeStream(in);
+				InputStream in = new java.net.URL(s[cur_image]).openStream();
+				bm = BitmapFactory.decodeStream(in);
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -72,7 +87,7 @@ public class PhotoActivity extends Activity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            
+
 			return null;
 		}
 
@@ -93,7 +108,7 @@ public class PhotoActivity extends Activity {
 			p.setCancelable(false);
 			p.setTitle("Loading Image");
 			p.show();
-			
+
 		}
 
 		@Override
@@ -101,7 +116,7 @@ public class PhotoActivity extends Activity {
 			// TODO Auto-generated method stub
 			super.onProgressUpdate(values);
 		}
-		
+
 	}
-	
+
 }

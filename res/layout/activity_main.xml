@@ -16,24 +16,24 @@
         android:layout_height="350dp"
         android:src="@drawable/bg" />
 
-    <TableRow
-        android:id="@+id/TableRow1"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal" >
 
         <Button
             android:id="@+id/button1"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/b1" />
 
         <Button
             android:id="@+id/button2"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/b2" />
-    </TableRow>
+    </LinearLayout>
 
 </LinearLayout>

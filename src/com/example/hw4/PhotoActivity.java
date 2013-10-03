@@ -41,7 +41,7 @@ public class PhotoActivity extends Activity {
 		s= getResources().getStringArray(R.array.photo_urls);
 		
 		ivMain = (ImageView) findViewById(R.id.ivMain);
-		ivMain.setScaleType(ScaleType.FIT_XY);
+		ivMain.setScaleType(ScaleType.FIT_CENTER);
 		
 		if (getIntent().getExtras() != null) {
 			mode = getIntent().getExtras().getInt("MODE");

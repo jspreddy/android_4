@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		findViewById(R.id.button1).setOnClickListener(new OnClickListener() {
+		findViewById(R.id.btnGallery).setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 				Intent i = new Intent(MainActivity.this, PhotoActivity.class);
@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-		findViewById(R.id.button1).setOnClickListener(new OnClickListener() {
+		findViewById(R.id.btnSlideShow).setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 				Intent i = new Intent(MainActivity.this, PhotoActivity.class);

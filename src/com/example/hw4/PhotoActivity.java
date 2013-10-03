@@ -13,21 +13,23 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 
 public class PhotoActivity extends Activity {
 
 	ExecutorService threadpool;
-	ProgressDialog p;
-	ImageView image;
+	ProgressDialog pdMain;
+	ImageView ivMain;
 	URL url;
 	String s[];
 	Bitmap bm;
-	int mode;
+	int mode=0;
 	int cur_image, size;
 	float nextXClick,prevXClick,maxX,minX,maxY,minY;
 
@@ -38,7 +40,9 @@ public class PhotoActivity extends Activity {
 		
 		s= getResources().getStringArray(R.array.photo_urls);
 		
-		image = (ImageView) findViewById(R.id.imageView1);
+		ivMain = (ImageView) findViewById(R.id.ivMain);
+		ivMain.setScaleType(ScaleType.FIT_XY);
+		
 		if (getIntent().getExtras() != null) {
 			mode = getIntent().getExtras().getInt("MODE");
 			cur_image = 0;
@@ -46,26 +50,20 @@ public class PhotoActivity extends Activity {
 			new DoWork().execute();
 		}
 
-		image.setOnTouchListener(new OnTouchListener() {
-
-			public boolean onTouch(View v, MotionEvent event) {
-				if (mode == 1) {
-					//maxY = v.getHeight();
-					//maxX = v.getWidth();
-					if (event.getAction() == MotionEvent.ACTION_DOWN) {
-						if (event.getX() > nextXClick && event.getX() < maxX
-								&& event.getY() > minY && event.getY() < maxY)
-							cur_image = (cur_image + 1) % size;
-						else if(event.getX() > prevXClick && event.getX() < minX
-								&& event.getY() > minY && event.getY() < maxY)
-							cur_image = (cur_image - 1) % size;
-
-					}
+		if(mode==1){
+			ivMain.setOnTouchListener(new OnTouchListener() {
+	
+				public boolean onTouch(View v, MotionEvent event) {
+					Log.d("DEBUG","Touched");
+					//TODO: view.setImageBitmap(imageloader.next());
+					return false;
 				}
-
-				return false;
-			}
-		});
+			});
+		}
+		else{
+			//TODO: init a slideshow with 2 second interval.
+			// on2secondInterval -> view.setImageBitmap(imageloader.next());
+		}
 	}
 
 	@Override
@@ -81,7 +79,7 @@ public class PhotoActivity extends Activity {
 		protected Void doInBackground(Void... params) {
 
 			try {
-				InputStream in = new java.net.URL(s[cur_image]).openStream();
+				InputStream in = new java.net.URL(s[13]).openStream();
 				bm = BitmapFactory.decodeStream(in);
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
@@ -98,19 +96,19 @@ public class PhotoActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			image.setImageBitmap(bm);
-			p.dismiss();
+			ivMain.setImageBitmap(bm);
+			pdMain.dismiss();
 		}
 
 		@Override
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
 			super.onPreExecute();
-			p = new ProgressDialog(PhotoActivity.this);
-			p.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			p.setCancelable(false);
-			p.setTitle("Loading Image");
-			p.show();
+			pdMain = new ProgressDialog(PhotoActivity.this);
+			pdMain.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			pdMain.setCancelable(false);
+			pdMain.setTitle("Loading Image");
+			pdMain.show();
 
 		}
 

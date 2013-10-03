@@ -37,6 +37,7 @@ public class PhotoActivity extends Activity {
 	    	//This method runs in the same thread as the UI.               
 	    	//Do something to the UI thread here
 	    	ivMain.setImageBitmap(bm);
+	    	Log.d("DEBUG", CurrentImage+": Image Set");
 			new GetImage(FORWARD).execute();
 	    }
 	};
@@ -156,16 +157,20 @@ public class PhotoActivity extends Activity {
 					CurrentImage=ImageUrls.length-1;
 				}
 
-				if (getBitmapFromMemCache(ImageUrls[CurrentImage]) != null)
+				if (getBitmapFromMemCache(ImageUrls[CurrentImage]) != null){
 					bm = getBitmapFromMemCache(ImageUrls[CurrentImage]);
+					Log.d("DEBUG", CurrentImage+": Get from CACHE");
+				}
 				else {
-					Log.d("DEBUG", "downloading: " + CurrentImage);
+					Log.d("DEBUG", CurrentImage+": start download");
 					InputStream in = new java.net.URL(ImageUrls[CurrentImage])
 							.openStream();
 					bm = BitmapFactory.decodeStream(in);
 					addBitmapToMemoryCache(ImageUrls[CurrentImage], bm);
+					Log.d("DEBUG", CurrentImage+": done");
 				}
 
+				
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
@@ -178,11 +183,13 @@ public class PhotoActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			if(mode==1){
 				ivMain.setImageBitmap(bm);
+				Log.d("DEBUG", CurrentImage+": Image Set");
 				pdMain.dismiss();
 			}
 			else{
 				if(this.dir==0){
 					ivMain.setImageBitmap(bm);
+					Log.d("DEBUG", CurrentImage+": Initial Image Set as soon as downloaded");
 					new GetImage(FORWARD).execute();
 				}
 				else{
@@ -193,7 +200,7 @@ public class PhotoActivity extends Activity {
 								TimerMethod();
 							}
 						}, 2000);
-						Log.d("DEBUG","timer scheduled");
+						Log.d("DEBUG", CurrentImage+": Timer start");
 					}
 					catch(Exception e){}
 				}

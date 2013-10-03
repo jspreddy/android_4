@@ -34,6 +34,10 @@
         <item>http://farm4.staticflickr.com/3759/9646438386_469eed5772.jpg</item>
         <item>http://farm8.staticflickr.com/7305/9646446852_6e485f90a1.jpg</item>
         <item>http://farm9.staticflickr.com/8032/8043029022_06643dc31e.jpg</item>
+        <item>http://lorempixel.com/200/600</item>
+        <item>http://lorempixel.com/100/900</item>
+        <item>http://lorempixel.com/200/200</item>
+        <item>http://lorempixel.com/700/200</item>
     </string-array>
 
     <string name="b1">Photos</string>

@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -29,6 +30,8 @@ public class PhotoActivity extends Activity {
 	int mode=0;
 	int FORWARD=1, BACKWARD=-1;
 	Timer timer;
+	LruCache<String, Bitmap> mMemoryCache;
+	
 	private Runnable Timer_Tick = new Runnable() {
 	    public void run() {
 	    	//This method runs in the same thread as the UI.               
@@ -49,6 +52,17 @@ public class PhotoActivity extends Activity {
 		
 		ivMain = (ImageView) findViewById(R.id.ivMain);
 		ivMain.setScaleType(ScaleType.FIT_CENTER);
+		
+		final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		final int cacheSize = maxMemory / 8;
+
+		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+			@Override
+			protected int sizeOf(String key, Bitmap bitmap) {
+				return bitmap.getByteCount() / 1024;
+			}
+
+		};
 		
 		if (getIntent().getExtras() != null) {
 			mode = getIntent().getExtras().getInt("MODE");
@@ -107,6 +121,15 @@ public class PhotoActivity extends Activity {
 	    this.runOnUiThread(Timer_Tick);
 	}
 
+	public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+		if (getBitmapFromMemCache(key) == null) {
+			mMemoryCache.put(key, bitmap);
+		}
+	}
+
+	public Bitmap getBitmapFromMemCache(String key) {
+		return mMemoryCache.get(key);
+	}
 	class GetImage extends AsyncTask<Void, Integer, Void> {
 
 		int dir;
@@ -132,9 +155,17 @@ public class PhotoActivity extends Activity {
 				else if(CurrentImage<0){
 					CurrentImage=ImageUrls.length-1;
 				}
-				Log.d("DEBUG","downloading: "+CurrentImage);
-				InputStream in = new java.net.URL(ImageUrls[CurrentImage]).openStream();
-				bm = BitmapFactory.decodeStream(in);
+
+				if (getBitmapFromMemCache(ImageUrls[CurrentImage]) != null)
+					bm = getBitmapFromMemCache(ImageUrls[CurrentImage]);
+				else {
+					Log.d("DEBUG", "downloading: " + CurrentImage);
+					InputStream in = new java.net.URL(ImageUrls[CurrentImage])
+							.openStream();
+					bm = BitmapFactory.decodeStream(in);
+					addBitmapToMemoryCache(ImageUrls[CurrentImage], bm);
+				}
+
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} catch (Exception e) {

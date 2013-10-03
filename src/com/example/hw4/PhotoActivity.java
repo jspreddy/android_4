@@ -1,3 +1,12 @@
+/*********************************
+ * Assignment #4
+ * FileName: PhotoActivity.java
+ *********************************
+ * Team Members:
+ * Richa Kandlikar
+ * Sai Phaninder Reddy Jonnala
+ * *******************************
+ */
 package com.example.hw4;
 
 import java.io.InputStream;

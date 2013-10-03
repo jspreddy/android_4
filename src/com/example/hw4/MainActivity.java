@@ -1,3 +1,12 @@
+/*********************************
+ * Assignment #4
+ * FileName: MainActivity.java
+ *********************************
+ * Team Members:
+ * Richa Kandlikar
+ * Sai Phaninder Reddy Jonnala
+ * *******************************
+ */
 package com.example.hw4;
 
 import android.os.Bundle;

@@ -2,6 +2,9 @@ package com.example.hw4;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -25,13 +28,22 @@ public class PhotoActivity extends Activity {
 	int CurrentImage;
 	int mode=0;
 	int FORWARD=1, BACKWARD=-1;
-
+	Timer timer;
+	private Runnable Timer_Tick = new Runnable() {
+	    public void run() {
+	    	//This method runs in the same thread as the UI.               
+	    	//Do something to the UI thread here
+	    	ivMain.setImageBitmap(bm);
+			new GetImage(FORWARD).execute();
+	    }
+	};
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo);
 		CurrentImage=0;
-		
+		timer=new Timer();
 		ImageUrls= getResources().getStringArray(R.array.photo_urls);
 		
 		
@@ -71,12 +83,28 @@ public class PhotoActivity extends Activity {
 		}
 		Log.d("DEBUG", "maxMem: "+ (Runtime.getRuntime().maxMemory()/1024)/1024 );
 	}
+	
+	@Override
+	public void onStop(){
+		super.onStop();
+		timer.cancel();
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.photo, menu);
 		return true;
+	}
+	
+	private void TimerMethod()
+	{
+	    //This method is called directly by the timer
+	    //and runs in the same thread as the timer.
+
+	    //We call the method that will work with the UI
+	    //through the runOnUiThread method.
+	    this.runOnUiThread(Timer_Tick);
 	}
 
 	class GetImage extends AsyncTask<Void, Integer, Void> {
@@ -104,6 +132,7 @@ public class PhotoActivity extends Activity {
 				else if(CurrentImage<0){
 					CurrentImage=ImageUrls.length-1;
 				}
+				Log.d("DEBUG","downloading: "+CurrentImage);
 				InputStream in = new java.net.URL(ImageUrls[CurrentImage]).openStream();
 				bm = BitmapFactory.decodeStream(in);
 			} catch (MalformedURLException e) {
@@ -111,25 +140,48 @@ public class PhotoActivity extends Activity {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			ivMain.setImageBitmap(bm);
-			pdMain.dismiss();
+			if(mode==1){
+				ivMain.setImageBitmap(bm);
+				pdMain.dismiss();
+			}
+			else{
+				if(this.dir==0){
+					ivMain.setImageBitmap(bm);
+					new GetImage(FORWARD).execute();
+				}
+				else{
+					try{
+						timer.schedule(new TimerTask(){
+							@Override
+							public void run() {
+								TimerMethod();
+							}
+						}, 2000);
+						Log.d("DEBUG","timer scheduled");
+					}
+					catch(Exception e){}
+				}
+			}
 			//Log.d("DEBUG","bitmapSize: "+bm.getByteCount()/(1024));
 		}
 
 		@Override
 		protected void onPreExecute() {
-			pdMain = new ProgressDialog(PhotoActivity.this);
-			pdMain.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			pdMain.setCancelable(false);
-			pdMain.setMessage("Loading Image");
-			pdMain.show();
-
+			if(mode==1){
+				pdMain = new ProgressDialog(PhotoActivity.this);
+				pdMain.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				pdMain.setCancelable(false);
+				pdMain.setMessage("Loading Image");
+				pdMain.show();
+			}
+			else{
+				
+			}
 		}
 
 		@Override

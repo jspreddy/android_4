@@ -54,7 +54,7 @@ public class PhotoActivity extends Activity {
 				public boolean onTouch(View v, MotionEvent event) {
 					Log.d("DEBUG", "Touched");
 					// TODO: view.setImageBitmap(imageloader.next());
-					nextImage();
+					prevImage();
 					return false;
 				}
 			});
@@ -84,7 +84,10 @@ public class PhotoActivity extends Activity {
 	}
 
 	public void prevImage() {
-		cur_image = (cur_image - 1) % size;
+		if (cur_image == 0)
+			cur_image = size -1;
+		else
+			cur_image = (cur_image - 1) % size;
 		loadImage();
 	}
 

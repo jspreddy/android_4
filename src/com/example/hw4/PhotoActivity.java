@@ -1,12 +1,7 @@
 package com.example.hw4;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.ExecutorService;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -23,47 +18,58 @@ import android.widget.ImageView.ScaleType;
 
 public class PhotoActivity extends Activity {
 
-	ExecutorService threadpool;
 	ProgressDialog pdMain;
 	ImageView ivMain;
-	URL url;
-	String s[];
+	String ImageUrls[];
 	Bitmap bm;
+	int CurrentImage;
 	int mode=0;
-	int cur_image, size;
-	float nextXClick,prevXClick,maxX,minX,maxY,minY;
+	int FORWARD=1, BACKWARD=-1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo);
+		CurrentImage=0;
 		
-		s= getResources().getStringArray(R.array.photo_urls);
+		ImageUrls= getResources().getStringArray(R.array.photo_urls);
+		
 		
 		ivMain = (ImageView) findViewById(R.id.ivMain);
 		ivMain.setScaleType(ScaleType.FIT_CENTER);
 		
 		if (getIntent().getExtras() != null) {
 			mode = getIntent().getExtras().getInt("MODE");
-			cur_image = 0;
-			size = s.length;
-			new DoWork().execute();
 		}
-
+		else{mode=1;}
+		
+		new GetImage(0).execute();
+		
 		if(mode==1){
 			ivMain.setOnTouchListener(new OnTouchListener() {
 	
 				public boolean onTouch(View v, MotionEvent event) {
-					Log.d("DEBUG","Touched");
-					//TODO: view.setImageBitmap(imageloader.next());
+					//Log.d("DEBUG","touch_x: "+event.getX());
+					//Log.d("DEBUG", "width: "+v.getWidth());
+					float width = v.getWidth();
+					float x=event.getX();
+					float percentage = (x/width) * 100;
+					Log.d("DEBUG","percentage: "+percentage);
+					if(percentage > 80.0f){
+						new GetImage(FORWARD).execute();
+					}
+					else if(percentage < 20.0f){
+						new GetImage(BACKWARD).execute();
+					}
+						
 					return false;
 				}
 			});
 		}
 		else{
 			//TODO: init a slideshow with 2 second interval.
-			// on2secondInterval -> view.setImageBitmap(imageloader.next());
 		}
+		Log.d("DEBUG", "maxMem: "+ (Runtime.getRuntime().maxMemory()/1024)/1024 );
 	}
 
 	@Override
@@ -73,19 +79,36 @@ public class PhotoActivity extends Activity {
 		return true;
 	}
 
-	class DoWork extends AsyncTask<Void, Integer, Void> {
+	class GetImage extends AsyncTask<Void, Integer, Void> {
 
+		int dir;
+		GetImage(int dir){
+			if(dir == BACKWARD){
+				this.dir = -1;
+			}
+			else if(dir == FORWARD){
+				this.dir = 1;
+			}
+			else{
+				this.dir=0;
+			}
+		}
+		
 		@Override
 		protected Void doInBackground(Void... params) {
-
 			try {
-				InputStream in = new java.net.URL(s[13]).openStream();
+				CurrentImage+=this.dir;
+				if(CurrentImage >= ImageUrls.length){
+					CurrentImage=0;
+				}
+				else if(CurrentImage<0){
+					CurrentImage=ImageUrls.length-1;
+				}
+				InputStream in = new java.net.URL(ImageUrls[CurrentImage]).openStream();
 				bm = BitmapFactory.decodeStream(in);
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -94,20 +117,17 @@ public class PhotoActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			// TODO Auto-generated method stub
-			super.onPostExecute(result);
 			ivMain.setImageBitmap(bm);
 			pdMain.dismiss();
+			//Log.d("DEBUG","bitmapSize: "+bm.getByteCount()/(1024));
 		}
 
 		@Override
 		protected void onPreExecute() {
-			// TODO Auto-generated method stub
-			super.onPreExecute();
 			pdMain = new ProgressDialog(PhotoActivity.this);
 			pdMain.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 			pdMain.setCancelable(false);
-			pdMain.setTitle("Loading Image");
+			pdMain.setMessage("Loading Image");
 			pdMain.show();
 
 		}
@@ -115,7 +135,6 @@ public class PhotoActivity extends Activity {
 		@Override
 		protected void onProgressUpdate(Integer... values) {
 			// TODO Auto-generated method stub
-			super.onProgressUpdate(values);
 		}
 
 	}
